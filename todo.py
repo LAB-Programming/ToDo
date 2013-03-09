@@ -1,5 +1,11 @@
 import time
+import threading
+import re
 from Tkinter import *
+
+def alarm():
+
+    print "hello world"
 
 def timeget():
     
@@ -38,12 +44,24 @@ def clock():
 
 def killlist():
 
+    save = open("savefile.txt", "wb")
+    save.write("")
+    save.close()
+    
     listbox.delete(0, END)
 
 
 def addnew():
     
     listbox.insert(END, " - " + todo.get() + " \t hours left: " + clock())
+    save = open("savefile.txt","a")
+    save.write(" - " + todo.get() + " \t hours left: " + clock()+ "\n")
+    save.close()
+    
+    hourminute = re.split(":", clock())
+    timertime = float(hourminute[0])*3600.0 + float(hourminute[1])*60.0
+    t = threading.Timer(timertime, alarm)
+    t.start()
     clock()
     
 
@@ -88,11 +106,6 @@ def new():
 
     label2 = Label(frame4, text="Time: ")
     label2.pack(side=RIGHT)
-
-    
-    
-
-
         
     
 root = Tk()
