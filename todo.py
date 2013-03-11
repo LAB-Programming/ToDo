@@ -2,17 +2,58 @@ import time
 import threading
 import re
 from Tkinter import *
+import tkMessageBox
 
 def alarm():
 
-    print "hello world"
+    tkMessageBox.showinfo("Times Up!", message)
 
+def loadfile():
+
+    files = open("savefile.txt", "r+")
+    alltext = files.read()
+    alltext = re.split("\n", alltext)
+    
+    for i in range(0, len(alltext) - 1 ,4):
+        
+        text = alltext[i]
+        hours = int( alltext[i + 1] )
+        minets = int( alltext[i + 2] )
+        AmPm = alltext[i + 3]
+
+        localtime = time.asctime( time.localtime(time.time()) )
+        minetsnow = int(localtime[14:16])
+
+        minetsleft = minets - minetsnow
+
+        if AmPm == "pm" or AmPm == "PM":
+            
+            hours = hours + 12
+            
+        localtime = time.asctime( time.localtime(time.time()) )
+        hoursnow = int(localtime[11:13])
+
+        hoursleft = hours - hoursnow
+
+        if minetsleft < 0:
+
+            hoursleft = hoursleft - 1
+            minetsleft = minetsleft + 60
+
+        listbox.insert(END, " - " + text + "      " + "hours left: " + str(hoursleft) + ":" + str(minetsleft))
+
+        global message
+        message = text
+        timertime = hoursleft*3600.0 + minetsleft*60.0
+        t = threading.Timer(timertime, alarm)
+        t.start()
+    
 def timeget():
     
     localtime = time.asctime( time.localtime(time.time()) )
     timeHours = int(localtime[11:13])
+    timeminets = int(localtime[14:16])
     
-                
     return timeHours
 
 def clock():
@@ -52,11 +93,14 @@ def killlist():
 
 
 def addnew():
-    
-    listbox.insert(END, " - " + todo.get() + " \t hours left: " + clock())
+
+    listbox.insert(END, " - " + todo.get() + "      " + "hours left: " + clock())
     save = open("savefile.txt","a")
-    save.write(" - " + todo.get() + " \t hours left: " + clock()+ "\n")
+    save.write(todo.get() + " \n " + timehours.get() + "\n" + timemin.get() + "\n" + ampm.get() + "\n")
     save.close()
+
+    global message
+    message = todo.get()
     
     hourminute = re.split(":", clock())
     timertime = float(hourminute[0])*3600.0 + float(hourminute[1])*60.0
@@ -106,11 +150,9 @@ def new():
 
     label2 = Label(frame4, text="Time: ")
     label2.pack(side=RIGHT)
-        
-    
+ 
 root = Tk()
 root.title("ToDo")
-#root.geometry("600x500")
 
 applet = Frame(root)
 applet.pack(side=LEFT, pady=1, padx=1)
@@ -138,6 +180,6 @@ button.pack(side=LEFT)
 button2 = Button(frame2, text= "-", width=1, height=1, command=killlist)
 button2.pack(side=LEFT)
 
-
+loadfile()
 
 root.mainloop()
